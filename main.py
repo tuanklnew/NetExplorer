@@ -6,6 +6,7 @@ import threading
 from IsPortOpen import TestPortOpen, TestPing, TestShellLogin
 import sys
 
+VERSION = '1.1'
 
 TELNET_PORT = 23
 SSH_PORT = 22
@@ -91,16 +92,18 @@ def GetResourceFromQueue(*args, **kwargs):
 
 def main():
     cliParser = ArgumentParser(description="Network Scanner Tool")
+    cliParser.add_argument('-v', '--version', action='version', version='NetExplore {}'.format(VERSION), help='Version of this tool')
     inputGrp = cliParser.add_mutually_exclusive_group(required=True)
-    inputGrp.add_argument('-f', '--file', help="Text file contains IP Address", type=str)
+    inputGrp.add_argument('-f', '--file', help="Text file contains IP  Address", type=str)
     inputGrp.add_argument('-i', '--ip', nargs='+', help="IP Addresses list", type=str)
     cliParser.add_argument('-s', '--shell', action='store_true', help='Test shell login')
     cliParser.add_argument('-u', '--username', required='--shell' in sys.argv, help='Username of shell')
     cliParser.add_argument('-p', '--password', required='--shell' in sys.argv, help='Password of shell')
     args = cliParser.parse_args()
 
-
-
+    if args.version:
+        print("Version {}".format(VERSION))
+        return
 
     for worker in range(NUM_WORKER):
         thread = threading.Thread(target=GetResourceFromQueue, args=[args.shell, args.username, args.password])
@@ -162,7 +165,7 @@ if __name__ == '__main__':
     print(" | |\  |  __/ |_  | |____ >  <| |_) | | (_) | | |  __/ |   ")
     print(" |_| \_|\___|\__| |______/_/\_\ .__/|_|\___/|_|  \___|_|   ")
     print("                              | |                          ")
-    print("   Developed by J03y M4rK0v   |_|  ")
+    print("   Developed by J03y M4rK0v   |_|  Version {}".format(VERSION))
     print("")
     print("")
     main()
