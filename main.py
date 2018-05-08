@@ -10,7 +10,12 @@ import sys
 TELNET_PORT = 23
 SSH_PORT = 22
 VNC_PORT = 5900
+HTTP_PORT = 80
+HTTPS_PORT = 443
+RDP_PORT = 3389
+
 NUM_WORKER = 15
+
 QUEUE = Queue()
 RESULT = []
 
@@ -21,6 +26,9 @@ class HostStatus:
     isTelnetOpen = None
     isSSHOpen = None
     isVNCOpen = None
+    isHTTPOpen = None
+    isHTTPSOpen = None
+    isRDPOpen = None
     isShellLoginSuccess = None
 
     def __init__(self, *args, **kwargs):
@@ -29,6 +37,9 @@ class HostStatus:
         self.isTelnetOpen = kwargs['isTelnetOpen']
         self.isSSHOpen = kwargs['isSSHOpen']
         self.isVNCOpen = kwargs['isVNCOpen']
+        self.isHTTPOpen = kwargs['isHTTPOpen']
+        self.isHTTPSOpen = kwargs['isHTTPSOpen']
+        self.isRDPOpen = kwargs['isRDPOpen']
         self.isShellLoginSuccess = kwargs['isShellLoginSuccess']
 
     def __str__(self):
@@ -37,11 +48,17 @@ class HostStatus:
                'isTelnetOpen = {} \n' \
                'isSSHOpen = {} \n' \
                'isVNCOpen = {} \n' \
+               'isHTTPOpen = {} \n' \
+               'isHTTPSOpen = {} \n' \
+               'isRDPOpen = {} \n' \
                'isShellLoginSuccess = {}'.format(self.ipAddress,
                                                  self.isPingSuccess,
                                                  self.isTelnetOpen,
                                                  self.isSSHOpen,
                                                  self.isVNCOpen,
+                                                 self.isHTTPOpen,
+                                                 self.isHTTPSOpen,
+                                                 self.isRDPOpen,
                                                  self.isShellLoginSuccess)
 
 
@@ -52,7 +69,9 @@ def GetResourceFromQueue(*args, **kwargs):
         telnetStatus = TestPortOpen(ipAddress, TELNET_PORT)
         sshStatus = TestPortOpen(ipAddress, SSH_PORT)
         vncStatus = TestPortOpen(ipAddress, VNC_PORT)
-
+        httpStatus = TestPortOpen(ipAddress, HTTP_PORT)
+        httpsStatus = TestPortOpen(ipAddress, HTTPS_PORT)
+        rdpStatus = TestPortOpen(ipAddress, RDP_PORT)
         if args[0]:
             shellLoginStatus = TestShellLogin(ipAddress, args[1], args[2])
         else:
@@ -62,6 +81,9 @@ def GetResourceFromQueue(*args, **kwargs):
                                 isTelnetOpen=telnetStatus,
                                 isSSHOpen=sshStatus,
                                 isVNCOpen=vncStatus,
+                                isHTTPOpen=httpStatus,
+                                isHTTPSOpen=httpsStatus,
+                                isRDPOpen=rdpStatus,
                                 isShellLoginSuccess=shellLoginStatus)
         RESULT.append(hostStatus)
         QUEUE.task_done()
@@ -106,22 +128,29 @@ def main():
                 QUEUE.put(ipAddress)
     QUEUE.join()  # block until all tasks are done
     if args.shell:
-        resultTable = PrettyTable(['IP Address', 'Ping', 'Telnet', 'SSH', 'VNC', 'Shell Login'])
+        resultTable = PrettyTable(['IP Address', 'Ping', 'Telnet', 'SSH', 'VNC', 'HTTP', 'HTTPS', 'RDP', 'Shell Login'])
         for host in RESULT:
             resultTable.add_row([host.ipAddress,
                                  'x' if host.isPingSuccess else ' ',
                                  'x' if host.isTelnetOpen else ' ',
                                  'x' if host.isSSHOpen else ' ',
                                  'x' if host.isVNCOpen else ' ',
+                                 'x' if host.isHTTPOpen else ' ',
+                                 'x' if host.isHTTPSOpen else ' ',
+                                 'x' if host.isRDPOpen else ' ',
                                  'x' if host.isShellLoginSuccess is True else host.isShellLoginSuccess])
     else:
-        resultTable = PrettyTable(['IP Address', 'Ping', 'Telnet', 'SSH', 'VNC'])
+        resultTable = PrettyTable(['IP Address', 'Ping', 'Telnet', 'SSH', 'VNC', 'HTTP', 'HTTPS', 'RDP'])
         for host in RESULT:
             resultTable.add_row([host.ipAddress,
                                  'x' if host.isPingSuccess else ' ',
                                  'x' if host.isTelnetOpen else ' ',
                                  'x' if host.isSSHOpen else ' ',
-                                 'x' if host.isVNCOpen else ' '])
+                                 'x' if host.isVNCOpen else ' ',
+                                 'x' if host.isHTTPOpen else ' ',
+                                 'x' if host.isHTTPSOpen else ' ',
+                                 'x' if host.isRDPOpen else ' ',
+                                 ])
     print(resultTable)
 
 
