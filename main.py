@@ -101,10 +101,6 @@ def main():
     cliParser.add_argument('-p', '--password', required='--shell' in sys.argv, help='Password of shell')
     args = cliParser.parse_args()
 
-    if args.version:
-        print("Version {}".format(VERSION))
-        return
-
     for worker in range(NUM_WORKER):
         thread = threading.Thread(target=GetResourceFromQueue, args=[args.shell, args.username, args.password])
         thread.daemon = True
