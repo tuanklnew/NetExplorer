@@ -6,7 +6,7 @@ import threading
 from IsPortOpen import TestPortOpen, TestPing, TestShellLogin
 import sys
 
-VERSION = '1.1'
+VERSION = '1.2'
 
 TELNET_PORT = 23
 SSH_PORT = 22

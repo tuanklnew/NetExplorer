@@ -50,7 +50,7 @@ def TestShellLogin(ipAddress, username, password):
     sshTransaction = paramiko.SSHClient()
     sshTransaction.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     try:
-        sshTransaction.connect(ipAddress, username=username, password=password, timeout=TIMEOUT)
+        sshTransaction.connect(ipAddress, username=username, password=password, allow_agent=False, look_for_keys=False)
         return True
     except paramiko.AuthenticationException:
         return 'Authentication Error'
